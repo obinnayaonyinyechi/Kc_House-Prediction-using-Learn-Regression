@@ -1,0 +1,150 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pickle
+import warnings
+warnings.filterwarnings('ignore')
+
+kc_house = pd.read_csv('kc_house_data.csv')
+kc_house.head()
+
+Data Preprocessing :
+Data Cleaning : Looking for missing values and cleaning them if found
+
+Data Tranformation : Transforming all the categorical object type values to numerical values.
+
+# Finding the Dataset columns
+kc_house.columns
+Index(['id', 'date', 'price', 'bedrooms', 'bathrooms', 'sqft_living',
+       'sqft_lot', 'floors', 'waterfront', 'view', 'condition', 'grade',
+       'sqft_above', 'sqft_basement', 'yr_built', 'yr_renovated', 'zipcode',
+       'lat', 'long', 'sqft_living15', 'sqft_lot15'],
+      dtype='object')
+
+# Finding the Dataset shape
+kc_house.shape
+
+# checking for duplicates
+kc_house.duplicated()
+
+# Checking the type of columns
+kc_house.dtypes
+
+# checking for missing values
+kc_house.isnull().sum()
+
+kc_house['sqft_above'].fillna(kc_house['sqft_above'].mean(), inplace=True)
+kc_house.isnull().sum()
+
+The only object feature here is date which will be dropped because we're not dealing with timeseries
+After that all of our features are numerical so we can move forward
+kc_house.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 21613 entries, 0 to 21612
+Data columns (total 21 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   id             21613 non-null  int64  
+ 1   date           21613 non-null  object 
+ 2   price          21613 non-null  float64
+ 3   bedrooms       21613 non-null  int64  
+ 4   bathrooms      21613 non-null  float64
+ 5   sqft_living    21613 non-null  int64  
+ 6   sqft_lot       21613 non-null  int64  
+ 7   floors         21613 non-null  float64
+ 8   waterfront     21613 non-null  int64  
+ 9   view           21613 non-null  int64  
+ 10  condition      21613 non-null  int64  
+ 11  grade          21613 non-null  int64  
+ 12  sqft_above     21613 non-null  float64
+ 13  sqft_basement  21613 non-null  int64  
+ 14  yr_built       21613 non-null  int64  
+ 15  yr_renovated   21613 non-null  int64  
+ 16  zipcode        21613 non-null  int64  
+ 17  lat            21613 non-null  float64
+ 18  long           21613 non-null  float64
+ 19  sqft_living15  21613 non-null  int64  
+ 20  sqft_lot15     21613 non-null  int64  
+dtypes: float64(6), int64(14), object(1)
+memory usage: 3.5+ MB
+kc_house.drop(columns=['id','date'], axis=1,inplace=True)
+kc_house.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 21613 entries, 0 to 21612
+Data columns (total 19 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   price          21613 non-null  float64
+ 1   bedrooms       21613 non-null  int64  
+ 2   bathrooms      21613 non-null  float64
+ 3   sqft_living    21613 non-null  int64  
+ 4   sqft_lot       21613 non-null  int64  
+ 5   floors         21613 non-null  float64
+ 6   waterfront     21613 non-null  int64  
+ 7   view           21613 non-null  int64  
+ 8   condition      21613 non-null  int64  
+ 9   grade          21613 non-null  int64  
+ 10  sqft_above     21613 non-null  float64
+ 11  sqft_basement  21613 non-null  int64  
+ 12  yr_built       21613 non-null  int64  
+ 13  yr_renovated   21613 non-null  int64  
+ 14  zipcode        21613 non-null  int64  
+ 15  lat            21613 non-null  float64
+ 16  long           21613 non-null  float64
+ 17  sqft_living15  21613 non-null  int64  
+ 18  sqft_lot15     21613 non-null  int64  
+dtypes: float64(6), int64(13)
+memory usage: 3.1 MB
+# Splitting our dataset into input and output
+X.shape
+X = kc_house.drop(['price'], axis=1)
+X.shape
+(21613, 18)
+y.shape
+y = kc_house['price']
+y.shape
+(21613,)
+X.head()
+
+y.head()
+
+# Apply train_test_split
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,y,train_size= 0.8, random_state = 42)
+
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+
+Model Building
+from sklearn.linear_model import LinearRegression
+
+# creating the object of the linear regression class
+model1 = LinearRegression()
+
+# training phase of the model
+model1.fit(X_train,y_train)
+
+# testing phase of the model
+y_pred = model1.predict(X_test)
+y_pred
+
+y_test
+
+performance of the model - r2 score
+from sklearn.metrics import r2_score
+
+print(r2_score(y_test,y_pred))
+
+# my model is 70.07 % accurate with linear Regression
+
+intercept value is
+
+model1.intercept_
+
+pickle.dump(model1, open('model.pkl','wb'))
+model = pickle.load(open('model.pkl','rb'))
+
+print(model.predict(X))
